@@ -46,25 +46,26 @@
 	<header class="bar bar-nav">
 	  <h1 class="title">SMS Demo</h1>
 	</header>
-
     <div class="app">
         <h1>PhoneGap</h1>
         <div id="deviceready" class="blink">
             <p class="event listening">Connecting to Device</p>
             <p class="event received">Device is Ready</p>
         </div>
-    </div>
-	<div class="content">
-	    	<div class="content-padded">
-		    	<form>
-				<input type="text" id="number" placeholder="Phone Number"><br/>
-				<textarea id="message" placeholder="Message"></textarea>
-				<input type="button" class="btn btn-positive btn-block" id="sendMessage" value="Send Message">
+		<div class="content">
+			<div class="content-padded">
+				<form>
+					<input type="text" id="number" placeholder="Phone Number"><br/>
+					<textarea id="message" placeholder="Message"></textarea>
+					<input type="button" class="btn btn-positive btn-block" id="sendMessage" value="Send Message">
+					<input type="button" class="btn btn-positive btn-block" id="cordovaDevice" value="Get Device Info">
 				</form>
 			</div>
 		</div>
+    </div>	
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="js/index.js"></script>
+    <script type="text/javascript" src="js/event.js"></script>
     <script type="text/javascript">
         app.initialize();
     </script>

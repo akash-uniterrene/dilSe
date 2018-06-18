@@ -33,8 +33,7 @@ var app = {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
-        //app.receivedEvent('deviceready');
-		app.findContacts();
+        app.receivedEvent('deviceready');
     },
     // Update DOM on a Received Event
     receivedEvent: function(id) {
@@ -46,34 +45,6 @@ var app = {
         receivedElement.setAttribute('style', 'display:block;');
 
         console.log('Received Event: ' + id);
-    },
-	findContacts: function() {
-	   var options = new ContactFindOptions();
-	   options.filter = "";
-	   options.multiple = true;
-	   fields = ["displayName"];
-	   navigator.contacts.find(fields, contactfindSuccess, contactfindError, options);
-		
-	   function contactfindSuccess(contacts) {
-		  for (var i = 0; i < contacts.length; i++) {
-			 alert("Display Name = " + contacts[i].displayName);
-		  }
-	   }
-		
-	   function contactfindError(message) {
-		  alert('Failed because: ' + message);
-	   }
-	}
+    }
 	
 };
-function gotContacts(c) {
-	alert();
-	console.log("gotContacts, number of results "+c.length);
-	for(var i=0, len=c.length; i<len; i++) {
-		console.dir(c[i]);
-	}
-}
-
-function errorHandler(e) {
-	console.log("errorHandler: "+e);
-}
