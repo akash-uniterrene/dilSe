@@ -1,74 +1,174 @@
 <!DOCTYPE html>
-<!--
-    Copyright (c) 2012-2016 Adobe Systems Incorporated. All rights reserved.
-
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-     KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
--->
 <html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+        <title>Hello World</title>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="jquery-1.9.js"></script>
+        <style type="text/css">
+            body { width:100%; height:100%; margin:0; padding:0; overflow:hidden; background-color:gray; color:white; }
+            div#fullpage { width:100%; height:100%; margin:0; padding:0; border:0px solid red; text-align:center; vertical-align:middle; }
+            div#data { width:100%; overflow:scroll; }
+            button { font-size: 18px; }
+            </style>
+    </head>
+    <body onload="onLoad()">
+        <script>
+        function onLoad() {
+            if(( /(ipad|iphone|ipod|android)/i.test(navigator.userAgent) )) {
+                document.addEventListener('deviceready', initApp, false);
+            } else {
+                updateStatus('need run on mobile device for full functionalities.');
+            }
+        }
 
-<head>
-    <meta charset="utf-8" />
-    <meta name="format-detection" content="telephone=no" />
-    <meta name="msapplication-tap-highlight" content="no" />
-    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
-    <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' gap:; style-src 'self' 'unsafe-inline'; media-src *" />
-    <!-- Good default declaration:
-    * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
-    * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
-    * Disables use of eval() and inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
-        * Enable inline JS: add 'unsafe-inline' to default-src
-        * Enable eval(): add 'unsafe-eval' to default-src
-    * Create your own at http://cspisawesome.com
-    -->
-    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: 'unsafe-inline' https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" /> -->
+        // we will restore the intercepted SMS here, for later restore
+        var smsList = [];
+        var interceptEnabled = false;
 
-    <link rel="stylesheet" type="text/css" href="css/index.css" />
-    <title>Hello World</title>
-</head>
+        function initApp() {
+        	if (! SMS ) { alert( 'SMS plugin not ready' ); return; }
+        	
+            document.addEventListener('onSMSArrive', function(e){
+            	var data = e.data;
+            	smsList.push( data );
+            	
+            	updateStatus('SMS arrived, count: ' + smsList.length );
+            	
+            	var divdata = $('div#data');
+            	divdata.html( divdata.html() + JSON.stringify( data ) );
+            	
+            });
+        }
+        
+        function update( id, str ) {
+        	$('div#' + id).html( str );
+        }
+        function updateStatus( str ) {
+        	$('div#status').html( str );
+        }
+        function updateData( str ) {
+        	$('div#data').html( str );
+        }
+        
+        function sendSMS() {
+        	var sendto = $('input#sendto').val().trim();
+        	var textmsg = $('textarea#textmsg').val();
+        	if(sendto.indexOf(";") >=0) {
+        		sendto = sendto.split(";");
+        		for(i in sendto) {
+        			sendto[i] = sendto[i].trim();
+        		}
+        	}
+        	if(SMS) SMS.sendSMS(sendto, textmsg, function(){}, function(str){alert(str);});
+        }
+        function listSMS() {
+    		updateData('');
+    		
+        	if(SMS) SMS.listSMS({}, function(data){
+    			updateStatus('sms listed as json array');
+    			//updateData( JSON.stringify(data) );
+    			
+    			var html = "";
+        		if(Array.isArray(data)) {
+        			for(var i in data) {
+        				var sms = data[i];
+        				smsList.push(sms);
+        				html += sms.address + ": " + sms.body + "<br/>";
+        			}
+        		}
+        		updateData( html );
+        		
+        	}, function(err){
+        		updateStatus('error list sms: ' + err);
+        	});
+        }
+        function deleteLastSMS() {
+    		updateData('');
 
-<body>
-	<header class="bar bar-nav">
-	  <h1 class="title">SMS Demo</h1>
-	</header>
-    <div class="app">
-        <h1>PhoneGap</h1>
-        <div id="deviceready" class="blink">
-            <p class="event listening">Connecting to Device</p>
-            <p class="event received">Device is Ready</p>
-        </div>
-		<div class="content">
-			<div class="content-padded">
-				<form>
-					<input type="text" id="number" placeholder="Phone Number"><br/>
-					<textarea id="message" placeholder="Message"></textarea>
-					<input type="button" class="btn btn-positive btn-block" id="sendMessage" value="Send Message">
-					<input type="button" class="btn btn-positive btn-block" id="cordovaDevice" value="Get Device Info">
-				</form>
-			</div>
-		</div>
-    </div>	
-    <script type="text/javascript" src="cordova.js"></script>
-    <script type="text/javascript" src="js/index.js"></script>
-    <script type="text/javascript" src="js/event.js"></script>
-    <script type="text/javascript">
-        app.initialize();
-    </script>
-</body>
+        	if(smsList.length == 0) {
+        		updateStatus( 'no sms id to delete' );
+        		return;
+        	}
+        	
+    		var sms = smsList.pop();
+    		
+        	if(SMS) SMS.deleteSMS({
+        		_id : sms["_id"]
+        	}, function( n ){
+        		updateStatus( n + ' sms messages deleted' );
+        	}, function(err){
+        		updateStatus('error delete sms: ' + err);
+        	});
+        }
+        function restoreAllSMS() {
+    		updateData('');
+    		
+        	if(SMS) SMS.restoreSMS(smsList, function( n ){
+        		// clear the list if restore successfully
+        		smsList.length = 0;
+        		updateStatus(n + ' sms messages restored');
+        		
+        	}, function(err){
+        		updateStatus('error restore sms: ' + err);
+        	});
+        }
+        function startWatch() {
+        	if(SMS) SMS.startWatch(function(){
+        		update('watching', 'watching started');
+        	}, function(){
+        		updateStatus('failed to start watching');
+        	});
+        }
+        function stopWatch() {
+        	if(SMS) SMS.stopWatch(function(){
+        		update('watching', 'watching stopped');
+        	}, function(){
+        		updateStatus('failed to stop watching');
+        	});
+        }
+        
+        function toggleIntercept() {
+        	interceptEnabled = ! interceptEnabled;
+        	
+        	if(interceptEnabled) { // clear the list before we start intercept
+        		smsList.length = 0;
+        	}
+        	
+        	if(SMS) SMS.enableIntercept(interceptEnabled, function(){}, function(){});
+        	
+        	$('span#intercept').text( 'intercept ' + (interceptEnabled ? 'ON' : 'OFF') );
+        	$('button#enable_intercept').text( interceptEnabled ? 'Disable' : 'Enable' );
+        }
 
+        </script>
+        <div id="fullpage">
+            <p>Demo for SMS Plugin</p>
+
+			To:<input type="text" size=16 id="sendto"/><br/>
+			Text:<textarea rows="5" cols="30" id="textmsg"></textarea><br/>
+			<button onclick="sendSMS();">Send</button>
+            <hr/>
+            <button onclick="listSMS();">List Inbox (recent 10)</button>
+            <hr/>
+            
+			<button onclick="startWatch();">Start Watch</button>
+            <button onclick="stopWatch();">Stop Watch</button>
+            <br/><div id='watching'></div>
+            <hr/>
+                
+            <span id='intercept'/>Intercept OFF</span><br/>
+			<button id='enable_intercept' onclick='toggleIntercept();'>Enable</button> 
+            <button onclick="restoreAllSMS();">Restore SMS</button>
+            <button onclick="deleteLastSMS();">Delete Last SMS</button>
+            <hr/>
+			
+            <button onclick="updateStatus('');updateData('');smsList.length=0;">Clear</button><br/>
+            
+            <div id='status'></div><hr/>
+            <div id='data' style='text-align:left;'></div>
+       </div>
+    </body>
 </html>

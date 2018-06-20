@@ -42,6 +42,9 @@
     },
     "cordova-plugin-contacts": {
       "PACKAGE_NAME": "org.dilse.connection"
+    },
+    "cordova-plugin-sms": {
+      "PACKAGE_NAME": "org.dilse.connection"
     }
   },
   "dependent_plugins": {
