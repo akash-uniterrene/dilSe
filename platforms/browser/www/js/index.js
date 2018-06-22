@@ -27,6 +27,7 @@ var app = {
     // 'load', 'deviceready', 'offline', and 'online'.
     bindEvents: function() {
         document.addEventListener('deviceready', this.onDeviceReady, false);
+		document.addEventListener("volumeupbutton", this.callbackFunction, false);  
     },
     // deviceready Event Handler
     //
@@ -34,9 +35,11 @@ var app = {
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
         app.receivedEvent('deviceready');
+		document.requestFileSystem(LocalFileSystem.PERSISTENT, 0, this.onFileSystemSuccess, this.onFileSystemFail);
     },
     // Update DOM on a Received Event
     receivedEvent: function(id) {
+		alert();
         var parentElement = document.getElementById(id);
         var listeningElement = parentElement.querySelector('.listening');
         var receivedElement = parentElement.querySelector('.received');
@@ -45,6 +48,27 @@ var app = {
         receivedElement.setAttribute('style', 'display:block;');
 
         console.log('Received Event: ' + id);
-    }
+    },
+	callbackFunction: function() {
+	   alert('Volume Up Button is pressed!');
+	},
+	// Update DOM on a Received Event
+    onFileSystemSuccess: function(fileSystem) {
+		alert(fileSystem.name);
+		/*var directoryEntry = fileSystem.root;
+		console.log(directoryEntry.fullPath);
+		directoryEntry.getDirectory("Dilse", {create: true, exclusive: false}, this.onDirectorySuccess, this.onDirectoryFail)
+		*/
+    },
 	
+	onFileSystemFail: function(fileSystem) {
+		alert(evt.target.error.code);
+    },
+	
+	onDirectorySuccess: function(fileSystem) {
+		alert(parent);
+    },
+	onDirectoryFail: function(fileSystem) {
+		alert("Unable to create new directory: " + error.code);
+    }	
 };
